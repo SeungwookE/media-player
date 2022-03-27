@@ -3,6 +3,7 @@ project(media-player C CXX)
 set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(lib/glfw)
+add_subdirectory(lib/FFmpeg)
 
 if(APPLE)
     list(APPEND EXTRA_LIBS
@@ -21,4 +22,4 @@ endif()
     
 
 add_executable(media-player src/main.cpp)
-target_link_libraries(media-player glfw ${EXTRA_LIBS})
+target_link_libraries(media-player FFmpeg glfw ${EXTRA_LIBS})
