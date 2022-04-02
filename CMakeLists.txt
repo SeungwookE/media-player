@@ -19,7 +19,11 @@ else()
         "-lGL -lGLU -lX11"
     )
 endif()
-    
 
-add_executable(media-player src/main.cpp)
+list(APPEND SOURCES
+    src/main.cpp
+    src/load_frame.cpp
+)
+
+add_executable(media-player ${SOURCES})
 target_link_libraries(media-player FFmpeg glfw ${EXTRA_LIBS})
