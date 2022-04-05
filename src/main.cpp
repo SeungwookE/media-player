@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <GLFW/glfw3.h>
 
+#include "video_reader.hpp"
+
 using namespace std;
 
 bool load_frame(const char* filename, int* width, int* height, unsigned char** data);
@@ -45,15 +47,28 @@ int main(int argc, const char** argv) {
 	// set range of view to rendering
 	// glViewport(0, 0, 640, 480);
 	
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); 
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	// float vertices[] = {
-	// 	-0.5f, -0.5f, 0.0f,
-	// 	0.5f, -0.5f, 0.0f,
-	// 	0.0f,  0.5f, 0.0f
-	// };  
+
 	int frame_width, frame_height;
 	unsigned char* frame_data;
+
+	VideoReaderState vr_state;
+	if (!video_reader_open(&vr_state, "/Users/seunguklee/dev/squat.mp4")) {
+		cout << "Couldn't open video file\n";
+		return 1;
+	}
+
+	const int frame_width = vr_state.width;
+	const int frame_height = vr_state.height;
+	uint8_t* frame_data = new uint8_t[frame_width * frame_height * 4];
+	
+	if (!video_reader_read_frame(&vr_state, frame_data)) {
+		cout << "Couldn't load video frame\n";
+		return 1;
+	}
+	video_reader_close(&vr_state);
+
 	if (!load_frame("/Users/seunguklee/dev/squat.mp4", &frame_width, &frame_height, &frame_data)) {
 		printf("Couldn't load video frame\n");
 		return 1;

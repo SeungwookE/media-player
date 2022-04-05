@@ -10,7 +10,7 @@ extern "C" {
 bool load_frame(const char* filename, int* width_out, int* height_out, unsigned char** data_out) {
 
     // Open the file using libavformat
-    AVFormatContext* av_format_ctx = avformat_alloc_context();
+    av_format_ctx = avformat_alloc_context();
     if (!av_format_ctx) {
         std::cout << "Couldn't created AVFormatContext\n";
         return false;
@@ -33,6 +33,7 @@ bool load_frame(const char* filename, int* width_out, int* height_out, unsigned 
             continue;
         }
 
+        // get first videostream index
         if (av_codec_params->codec_type == AVMEDIA_TYPE_VIDEO) {
             video_stream_index = i;
             break;
@@ -45,7 +46,7 @@ bool load_frame(const char* filename, int* width_out, int* height_out, unsigned 
     }
 
     // Set up a codec context for the decoder
-    AVCodecContext* av_codec_ctx = avcodec_alloc_context3(av_codec);
+    av_codec_ctx = avcodec_alloc_context3(av_codec);
     if (!av_codec_ctx) {
         std::cout << "Couldn't create AVCodecContext\n";
         return false;
@@ -61,12 +62,12 @@ bool load_frame(const char* filename, int* width_out, int* height_out, unsigned 
         return false;
     }
 
-    AVFrame* av_frame = av_frame_alloc();
+    av_frame = av_frame_alloc();
     if (!av_frame) {
         std::cout << "Couldn't allocate AVFrame\n";
         return false;
     }
-    AVPacket* av_packet = av_packet_alloc();
+    av_packet = av_packet_alloc();
     if (!av_packet) {
         std::cout << "Couldn't allocate AVPacket\n";
         return false;
@@ -77,6 +78,7 @@ bool load_frame(const char* filename, int* width_out, int* height_out, unsigned 
         if (av_packet->stream_index != video_stream_index) {
             continue;
         }
+        // decoding packet
         response = avcodec_send_packet(av_codec_ctx, av_packet);
         if (response < 0) {
             std::cout << "Failed to decode packet:" << av_err2str(response) << std::endl;
@@ -110,7 +112,7 @@ bool load_frame(const char* filename, int* width_out, int* height_out, unsigned 
     
     uint8_t* data = new uint8_t[av_frame->width * av_frame->height * 4];
 
-    SwsContext* sws_scaler_ctx = sws_getContext(av_frame->width, av_frame->height, av_codec_ctx->pix_fmt,
+    sws_scaler_ctx = sws_getContext(av_frame->width, av_frame->height, av_codec_ctx->pix_fmt,
                                                 av_frame->width, av_frame->height, AV_PIX_FMT_RGB0,
                                                 SWS_BILINEAR, NULL, NULL, NULL);
     
