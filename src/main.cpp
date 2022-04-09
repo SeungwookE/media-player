@@ -81,8 +81,6 @@ int main(int argc, const char** argv) {
 		glMatrixMode(GL_MODELVIEW);
 
 		// Read a new frame and load it into texture
-		
-		
 		if (!video_reader_read_frame(&vr_state, frame_data)) {
 			cout << "Couldn't load video frame\n";
 			return 1;

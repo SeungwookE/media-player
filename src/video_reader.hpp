@@ -11,7 +11,7 @@ extern "C" {
 struct VideoReaderState {
     // Public infos for other parts of the program to read from
     int width, height;
-    uint8_t* frame_buffer;
+    AVRational time_base;
 
     // Private internal state
     AVFormatContext* av_format_ctx;
