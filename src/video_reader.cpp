@@ -8,6 +8,7 @@ bool video_reader_open(VideoReaderState* state, const char* filename) {
     // Unpack members of state
     auto& width = state->width;
     auto& height = state->height;
+    auto& time_base = state->time_base;
     auto& av_format_ctx = state->av_format_ctx;
     auto& av_codec_ctx = state->av_codec_ctx;
     auto& video_stream_index = state->video_stream_index;
@@ -42,6 +43,7 @@ bool video_reader_open(VideoReaderState* state, const char* filename) {
             video_stream_index = i;
             width = av_codec_params->width;
             height = av_codec_params->height;
+            time_base = av_format_ctx->streams[i]->time_base;
             break;
         }
     }
@@ -84,7 +86,7 @@ bool video_reader_open(VideoReaderState* state, const char* filename) {
     return true;
 }
 
-bool video_reader_read_frame(VideoReaderState* state, uint8_t* frame_buffer) {
+bool video_reader_read_frame(VideoReaderState* state, uint8_t* frame_buffer, int64_t* pts) {
 
     // Unpack members of state
     auto& width = state->width;
@@ -119,6 +121,19 @@ bool video_reader_read_frame(VideoReaderState* state, uint8_t* frame_buffer) {
         av_packet_unref(av_packet);
         break;
     }
+    
+    *pts = av_frame->pts;
+    
+    printf(
+        "Frame %c (%d) pts %d dts %d key_frame %d [coded_picture_number %d, display_picture_number %d]",
+        av_get_picture_type_char(av_frame->pict_type),
+        av_codec_ctx->frame_number,
+        av_frame->pts,
+        av_frame->pkt_dts,
+        av_frame->key_frame,
+        av_frame->coded_picture_number,
+        av_frame->display_picture_number
+    );
     
     // Set up sws scaler
     sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,

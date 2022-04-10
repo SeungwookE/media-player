@@ -68,6 +68,8 @@ int main(int argc, const char** argv) {
 	const int frame_height = vr_state.height;
 	uint8_t* frame_data = new uint8_t[frame_width * frame_height * 4];
 	
+    double first_frame_time;
+    
 	// render loop
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -81,9 +83,21 @@ int main(int argc, const char** argv) {
         glMatrixMode(GL_MODELVIEW);
 
         // Read a new frame and load it into texture
-        if (!video_reader_read_frame(&vr_state, frame_data)) {
+        int64_t pts;
+        if (!video_reader_read_frame(&vr_state, frame_data, &pts)) {
             printf("Couldn't load video frame\n");
             return 1;
+        }
+        
+        static bool first_frame = true;
+        if (first_frame) {
+            glfwSetTime(0.0);
+            first_frame = false;
+        }
+        
+        double pt_in_seconds = pts * (double)vr_state.time_base.num / (double)vr_state.time_base.den;
+        while (pt_in_seconds > glfwGetTime()) {
+            glfwWaitEventsTimeout(pt_in_seconds - glfwGetTime());
         }
 
         glBindTexture(GL_TEXTURE_2D, tex_handle);
