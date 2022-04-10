@@ -121,11 +121,9 @@ bool video_reader_read_frame(VideoReaderState* state, uint8_t* frame_buffer) {
     }
     
     // Set up sws scaler
-    if (!sws_scaler_ctx) {
-        sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,
-                                        width, height, AV_PIX_FMT_RGB0,
-                                        SWS_BILINEAR, NULL, NULL, NULL);
-    }
+    sws_scaler_ctx = sws_getContext(width, height, av_codec_ctx->pix_fmt,
+                                    width, height, AV_PIX_FMT_RGB0,
+                                    SWS_BILINEAR, NULL, NULL, NULL);
     
     if (!sws_scaler_ctx) {
         cout << "Couldn't initialize sw scaler\n";
